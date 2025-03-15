@@ -26,6 +26,9 @@ const typographyVariants = cva('', {
       success: 'text-success',
       warning: 'text-warning',
       red: 'text-destructive',
+      white: 'text-white',
+      subtleWhite: 'text-white/70',
+      purple: 'text-purple-500',
     },
   },
   defaultVariants: {
