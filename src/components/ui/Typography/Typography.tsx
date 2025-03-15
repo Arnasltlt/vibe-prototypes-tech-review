@@ -29,6 +29,8 @@ const typographyVariants = cva('', {
       white: 'text-white',
       subtleWhite: 'text-white/70',
       purple: 'text-purple-500',
+      green: 'text-green-500',
+      orange: 'text-orange-500',
     },
   },
   defaultVariants: {
