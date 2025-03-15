@@ -1,0 +1,27 @@
+/* UI Variables */
+:root {
+  /* Border */
+  --border-radius: 3px;
+  --border-width: 1px;
+  --border-color: var(--grey-overlay-400);
+  
+  /* Shadows */
+  --box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08), 0 3px 8px 0 rgba(0, 0, 0, 0.04);
+  --box-shadow-inset: inset 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+  --box-shadow-primary: 0 0 0 calc(var(--border-width) * 1.5) var(--network-blue-400);
+  --box-shadow-wide: 0 0 1rem rgba(0, 0, 0, 0.05);
+  --box-shadow-double: 0 6px 12px 0 rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --box-shadow-left: -4px 0 8px rgba(0, 0, 0, 0.04), -1px 0 4px rgba(0, 0, 0, 0.08);
+  --box-shadow-bottom: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --box-shadow-top: 0 -4px 8px rgba(0, 0, 0, 0.08);
+  
+  /* Transitions */
+  --transition-short: 0.15s ease-out;
+  --transition-medium: 0.25s ease-out;
+  --transition-long: 0.35s ease-in-out;
+  --transition-short-bouncy: 0.15s cubic-bezier(0.46, 0.01, 0.14, 1.35);
+  
+  /* Layout */
+  --navbar-height: 64px;
+  --toolbar-height: 64px;
+}

@@ -1,0 +1,103 @@
+:root {
+  /* Base colors */
+  --white: #fff;
+  --black: #000;
+  --dark-background: #191919;
+  
+  /* Network Blue (formerly Purple) */
+  --network-blue-100: #e6f1fc;
+  --network-blue-200: #9ec9f4;
+  --network-blue-300: #3890e9;
+  --network-blue-400: #0071e3;
+  --network-blue-500: #2563be;
+  --network-blue-600: #16417f;
+  --network-blue-700: #082242;
+  --network-blue-000: #f7fbfe;
+  
+  /* Network Blue - dark background */
+  --network-blue-dark-100: #162130;
+  --network-blue-dark-200: #132e50;
+  
+  /* Red */
+  --red-100: #fae6e8;
+  --red-200: #ea99a3;
+  --red-300: #d63347;
+  --red-400: #cc0019;
+  --red-500: #b7001f;
+  --red-600: #750014;
+  --red-700: #3d000a;
+  
+  /* Red - dark background */
+  --red-dark-100: #2a1619;
+  --red-dark-200: #441319;
+  
+  /* Orange */
+  --orange-100: #fcf1e6;
+  --orange-200: #f5c599;
+  --orange-300: #eb8633;
+  --orange-400: #e66400;
+  --orange-500: #cd4f00;
+  --orange-600: #852600;
+  --orange-700: #450200;
+  
+  /* Orange - dark background */
+  --orange-dark-100: #2d1c16;
+  --orange-dark-200: #4a2213;
+  
+  /* Yellow */
+  --yellow-100: #fefae6;
+  --yellow-200: #fded9a;
+  --yellow-300: #fbda35;
+  --yellow-400: #fbce03;
+  --yellow-500: #e1b402;
+  --yellow-600: #916b01;
+  --yellow-700: #4a2a00;
+  
+  /* Yellow - dark background */
+  --yellow-dark-100: #2f2716;
+  --yellow-dark-200: #4f3a14;
+  
+  /* Green */
+  --green-100: #edfaf5;
+  --green-200: #99d5c1;
+  --green-300: #33ab85;
+  --green-400: #009669;
+  --green-500: #00865e;
+  --green-600: #005740;
+  --green-700: #002c22;
+  
+  /* Green - dark background */
+  --green-dark-100: #162521;
+  --green-dark-200: #13372c;
+  
+  /* Grey overlays */
+  --grey-overlay-100: rgba(0, 0, 0, 0.03);
+  --grey-overlay-200: rgba(0, 0, 0, 0.05);
+  --grey-overlay-300: rgba(0, 0, 0, 0.08);
+  --grey-overlay-400: rgba(0, 0, 0, 0.13);
+  --grey-overlay-500: rgba(0, 0, 0, 0.21);
+  --grey-overlay-600: rgba(0, 0, 0, 0.34);
+  --grey-overlay-700: rgba(0, 0, 0, 0.56);
+  --grey-overlay-800: rgba(0, 0, 0, 0.69);
+  --grey-overlay-900: rgba(0, 0, 0, 0.77);
+  --grey-overlay-1000: rgba(0, 0, 0, 0.85);
+  
+  /* White overlays */
+  --white-overlay-100: rgba(255, 255, 255, 0.06);
+  --white-overlay-200: rgba(255, 255, 255, 0.1);
+  --white-overlay-300: rgba(255, 255, 255, 0.15);
+  --white-overlay-400: rgba(255, 255, 255, 0.24);
+  --white-overlay-500: rgba(255, 255, 255, 0.38);
+  --white-overlay-600: rgba(255, 255, 255, 0.62);
+  --white-overlay-700: rgba(255, 255, 255, 0.77);
+  --white-overlay-800: rgba(255, 255, 255, 0.86);
+  
+  /* Text colors */
+  --text-default: var(--grey-overlay-1000);
+  --text-subtle: var(--grey-overlay-700);
+  --text-subtle-white: var(--white-overlay-700);
+  
+  /* Brand colors */
+  --protolabs-primary: #429dc9;
+  --protolabs-secondary: #393f4c;
+}
