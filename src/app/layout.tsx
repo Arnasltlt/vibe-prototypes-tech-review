@@ -32,6 +32,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
         style={{ fontFamily: "var(--font-family, var(--font-geist-sans))" }}
+        data-new-gr-c-s-check-loaded="14.1226.0"
+        data-gr-ext-installed=""
       >
         {children}
       </body>

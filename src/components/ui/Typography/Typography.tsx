@@ -18,8 +18,8 @@ const typographyVariants = cva('', {
       caption: 'caption',
     },
     color: {
-      default: 'text-foreground',
-      subtle: 'text-muted-foreground',
+      default: 'text-gray-900',
+      subtle: 'text-gray-700',
       primary: 'text-primary',
       secondary: 'text-secondary',
       accent: 'text-accent',
@@ -28,9 +28,9 @@ const typographyVariants = cva('', {
       red: 'text-destructive',
       white: 'text-white',
       subtleWhite: 'text-white/70',
-      purple: 'text-purple-500',
-      green: 'text-green-500',
-      orange: 'text-orange-500',
+      purple: 'text-purple-600',
+      green: 'text-green-600',
+      orange: 'text-orange-600',
     },
   },
   defaultVariants: {

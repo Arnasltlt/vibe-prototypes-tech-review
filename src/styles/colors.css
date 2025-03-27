@@ -70,17 +70,17 @@
   --green-dark-100: #162521;
   --green-dark-200: #13372c;
   
-  /* Grey overlays */
+  /* Grey overlays - Updated for better contrast */
   --grey-overlay-100: rgba(0, 0, 0, 0.03);
   --grey-overlay-200: rgba(0, 0, 0, 0.05);
   --grey-overlay-300: rgba(0, 0, 0, 0.08);
   --grey-overlay-400: rgba(0, 0, 0, 0.13);
   --grey-overlay-500: rgba(0, 0, 0, 0.21);
-  --grey-overlay-600: rgba(0, 0, 0, 0.34);
-  --grey-overlay-700: rgba(0, 0, 0, 0.56);
-  --grey-overlay-800: rgba(0, 0, 0, 0.69);
-  --grey-overlay-900: rgba(0, 0, 0, 0.77);
-  --grey-overlay-1000: rgba(0, 0, 0, 0.85);
+  --grey-overlay-600: rgba(0, 0, 0, 0.45); /* Darker than before */
+  --grey-overlay-700: rgba(0, 0, 0, 0.65); /* Darker than before */
+  --grey-overlay-800: rgba(0, 0, 0, 0.78); /* Darker than before */
+  --grey-overlay-900: rgba(0, 0, 0, 0.85); /* Darker than before */
+  --grey-overlay-1000: rgba(0, 0, 0, 0.92); /* Darker than before */
   
   /* White overlays */
   --white-overlay-100: rgba(255, 255, 255, 0.06);
@@ -92,10 +92,10 @@
   --white-overlay-700: rgba(255, 255, 255, 0.77);
   --white-overlay-800: rgba(255, 255, 255, 0.86);
   
-  /* Text colors */
-  --text-default: var(--grey-overlay-1000);
-  --text-subtle: var(--grey-overlay-700);
-  --text-subtle-white: var(--white-overlay-700);
+  /* Text colors - Updated for better contrast */
+  --text-default: var(--black); /* Pure black for maximum contrast */
+  --text-subtle: var(--grey-overlay-800); /* Much darker than before */
+  --text-subtle-white: var(--white-overlay-800); /* Brighter than before */
   
   /* Brand colors */
   --protolabs-primary: #429dc9;

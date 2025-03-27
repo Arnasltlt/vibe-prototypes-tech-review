@@ -2,6 +2,8 @@
 
 import React, { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { cn } from "@/lib/utils";
+import { Typography } from "../Typography/Typography";
 
 export type CardType = 'default' | 'inline' | 'centered' | 'link';
 
@@ -91,20 +93,38 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(({
         
         <div className={`card-details ${fullDetails ? 'w-full' : ''}`}>
           {eyebrow && (
-            <div className="text-xs text-[var(--grey-overlay-600)] mb-1">
-              {eyebrow}
+            <div className="text-xs text-gray-700 mb-1">
+              {typeof eyebrow === 'string' ? (
+                <Typography variant="eyebrow" color="subtle">
+                  {eyebrow}
+                </Typography>
+              ) : (
+                eyebrow
+              )}
             </div>
           )}
           
           {title && (
-            <div className="text-base font-medium mb-1">
-              {title}
+            <div className="pb-2">
+              {typeof title === "string" ? (
+                <Typography variant="h3" color="default" className="font-semibold text-gray-900">
+                  {title}
+                </Typography>
+              ) : (
+                title
+              )}
             </div>
           )}
           
           {description && (
-            <div className="text-sm text-[var(--grey-overlay-800)]">
-              {description}
+            <div className="text-sm">
+              {typeof description === "string" ? (
+                <Typography variant="body2" color="default" className="text-gray-800">
+                  {description}
+                </Typography>
+              ) : (
+                description
+              )}
             </div>
           )}
         </div>
@@ -112,8 +132,14 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(({
         {(info || action) && (
           <div className={`card-action mt-3 ${cardType === 'inline' ? 'ml-auto' : 'flex justify-between items-center'}`}>
             {info && (
-              <span className="text-sm text-[var(--grey-overlay-600)]">
-                {info}
+              <span className="text-sm text-gray-700">
+                {typeof info === 'string' ? (
+                  <Typography variant="body2" color="subtle">
+                    {info}
+                  </Typography>
+                ) : (
+                  info
+                )}
               </span>
             )}
             
