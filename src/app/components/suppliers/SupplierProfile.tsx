@@ -3,19 +3,28 @@ import { Supplier } from './types';
 import { Typography } from '@/components/ui/Typography/Typography';
 
 type Tab = 'overview' | 'comments' | 'documents';
-
+// Props for the SupplierProfile component
+// supplier: The supplier data to display
+// isOpen: Controls visibility of the profile modal
+// onClose: Function to call when closing the modal
 interface SupplierProfileProps {
   supplier: Supplier;
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Structure for supplier comments that can be displayed
+// title: The comment heading
+// message: The main comment text
+// author: Name of who wrote the comment
+// dateCreated: When the comment was made
 interface Comment {
   title: string;
   message: string;
   author: string;
   dateCreated: string;
 }
+
 
 export function SupplierProfile({ supplier, isOpen, onClose }: SupplierProfileProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');

@@ -70,6 +70,19 @@
   --green-dark-100: #162521;
   --green-dark-200: #13372c;
   
+  /* Pink */
+  --pink-100: #fce7f3;
+  --pink-200: #f9a8d4;
+  --pink-300: #f472b6;
+  --pink-400: #ec4899;
+  --pink-500: #db2777;
+  --pink-600: #9d174d;
+  --pink-700: #831843;
+
+  /* Pink - dark background */
+  --pink-dark-100: #301621;
+  --pink-dark-200: #50132e;
+  
   /* Grey overlays - Updated for better contrast */
   --grey-overlay-100: rgba(0, 0, 0, 0.03);
   --grey-overlay-200: rgba(0, 0, 0, 0.05);

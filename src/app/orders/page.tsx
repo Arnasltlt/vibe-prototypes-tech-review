@@ -14,7 +14,7 @@ const mockOrders = [
     name: 'Robotics Controller Housing',
     customer: 'Acme Corp',
     industry: 'Aerospace',
-    status: 'In Production',
+    status: 'Draft',
     created: 'Feb 12, 2025',
     delivery: 'Apr 15, 2025',
   },
@@ -23,7 +23,7 @@ const mockOrders = [
     name: 'Medical Device Enclosure',
     customer: 'MediTech Solutions',
     industry: 'Medical',
-    status: 'Quoted',
+    status: 'Draft',
     created: 'Feb 10, 2025',
     delivery: 'Mar 25, 2025',
   },
@@ -32,7 +32,7 @@ const mockOrders = [
     name: 'EV Battery Terminal',
     customer: 'ElectroDrive Inc',
     industry: 'Automotive',
-    status: 'In Production',
+    status: 'Production PO issued',
     created: 'Feb 5, 2025',
     delivery: 'Mar 20, 2025',
   },
@@ -41,7 +41,7 @@ const mockOrders = [
     name: 'Industrial Sensor Mount',
     customer: 'SensorTech Industries',
     industry: 'Industrial',
-    status: 'Quote Requested',
+    status: 'Production RFQ',
     created: 'Feb 2, 2025',
     delivery: 'Apr 5, 2025',
   },
@@ -50,7 +50,7 @@ const mockOrders = [
     name: 'Camera Mounting Bracket',
     customer: 'VisTech Systems',
     industry: 'Consumer Electronics',
-    status: 'Shipped',
+    status: 'Canceled',
     created: 'Jan 28, 2025',
     delivery: 'Mar 5, 2025',
   },
@@ -69,16 +69,16 @@ const mockOrders = [
 const StatusBadge = ({ status }: { status: string }) => {
   const getStatusColorClass = () => {
     switch (status) {
-      case 'In Production':
-        return 'bg-green-100 text-green-800';
-      case 'Quoted':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Quote Requested':
-        return 'bg-purple-100 text-purple-800';
-      case 'Shipped':
-        return 'bg-blue-100 text-blue-800';
       case 'Draft':
         return 'bg-gray-100 text-gray-800';
+      case 'PO issued':
+        return 'bg-blue-100 text-blue-800';
+      case 'Canceled':
+        return 'bg-red-100 text-red-800';
+      case 'Production RFQ':
+        return 'bg-purple-100 text-purple-800';
+      case 'Production PO issued':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -92,12 +92,12 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function OrdersPage() {
-  const [activeTab, setActiveTab] = useState('All Orders');
+  const [activeTab, setActiveTab] = useState('All Requests');
   const router = useRouter();
   
   // Tab data
   const tabs = [
-    { id: 'all', label: 'All Orders', count: 42 },
+    { id: 'all', label: 'All Requests', count: 42 },
     { id: 'active', label: 'Active', count: 28 },
     { id: 'quoted', label: 'Quoted', count: 7 },
     { id: 'production', label: 'In Production', count: 14 },
@@ -166,15 +166,15 @@ export default function OrdersPage() {
               <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z"></path>
               </svg>
-              Orders
+              Requests to Quote
             </a>
             
-            <a href="/orders/new" className="flex items-center py-2 text-gray-300 hover:text-white">
+            <a href="/example-quote" className="flex items-center py-2 text-gray-300 hover:text-white">
               <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                 <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"></path>
               </svg>
-              New Order
+              Example Quote
             </a>
           </div>
         </div>
@@ -184,33 +184,8 @@ export default function OrdersPage() {
           <div className="w-full mx-auto px-6 py-6 max-w-7xl">
             {/* Header with Actions */}
             <div className="flex justify-between items-center mb-6">
-              <Typography variant="h1" color="default" className="text-2xl font-bold text-black">Production Orders</Typography>
+              <Typography variant="h1" color="default" className="text-2xl font-bold text-black">Requests to Quote</Typography>
               <div className="flex space-x-2">
-                <Button 
-                  buttonType="outline" 
-                  colorVariant="purple" 
-                  size="m"
-                  onClick={() => router.push('/orders/action-center')}
-                  className="flex items-center gap-2 text-purple-700"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2l-1 2H8l-1-2H5V5z" clipRule="evenodd" />
-                  </svg>
-                  Action Center
-                  <span className="ml-1 px-1.5 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">6</span>
-                </Button>
-                <Button 
-                  buttonType="default" 
-                  colorVariant="purple" 
-                  size="m"
-                  onClick={() => router.push('/orders/new')}
-                  className="flex items-center gap-2"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  New Order
-                </Button>
                 <Button 
                   buttonType="outline" 
                   colorVariant="grey" 
@@ -235,36 +210,6 @@ export default function OrdersPage() {
                 </Button>
               </div>
             </div>
-            
-            {/* Action Center Alert Card */}
-            <Card 
-              className="mb-6 bg-gradient-to-r from-indigo-100 to-purple-100"
-              title={
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <svg className="h-5 w-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
-                    </svg>
-                    <Typography variant="subtitle1" color="default" className="font-medium text-gray-900">New! Try the Action Center</Typography>
-                  </div>
-                </div>
-              }
-              description={
-                <div className="mt-2 flex justify-between items-center">
-                  <Typography variant="body2" color="default" className="text-sm text-gray-800">
-                    Focus on what matters most. View orders that need your attention prioritized by urgency.
-                  </Typography>
-                  <Button 
-                    buttonType="default" 
-                    colorVariant="purple" 
-                    size="s"
-                    onClick={() => router.push('/orders/action-center')}
-                  >
-                    View Action Center
-                  </Button>
-                </div>
-              }
-            />
             
             {/* Search and Filter Bar */}
             <Card 
@@ -298,11 +243,10 @@ export default function OrdersPage() {
                     >
                       <option>All Statuses</option>
                       <option>Draft</option>
-                      <option>Quote Requested</option>
-                      <option>Quoted</option>
-                      <option>In Production</option>
-                      <option>Shipped</option>
-                      <option>Completed</option>
+                      <option>PO issued</option>
+                      <option>Canceled</option>
+                      <option>Production RFQ</option>
+                      <option>Production PO issued</option>
                     </select>
                     <select 
                       className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-[var(--network-blue-400)] text-gray-900 bg-white"
@@ -345,7 +289,7 @@ export default function OrdersPage() {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Order</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Request</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Customer</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Status</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Created</th>
@@ -388,8 +332,8 @@ export default function OrdersPage() {
                               href="#" 
                               className="text-gray-800 hover:text-gray-900"
                             >
-                              {order.status === 'In Production' || order.status === 'Shipped' ? 'Track' : 
-                                order.status === 'Draft' || order.status === 'Quote Requested' ? 'Edit' : 'Compare'}
+                              {order.status === 'Draft' || order.status === 'Production RFQ' ? 'Edit' :
+                               order.status === 'Canceled' ? 'View Details' : 'Track'}
                             </a>
                           </td>
                         </tr>

@@ -40,6 +40,7 @@ const buttonVariants = cva(
         red: '',
         black: '',
         blue: '',
+        pink: '',
       },
       // Button state
       isDisabled: {
@@ -90,6 +91,13 @@ const buttonVariants = cva(
         className:
           'bg-[var(--grey-overlay-900)] text-white hover:bg-[var(--grey-overlay-1000)] active:bg-[var(--black)]',
       },
+      {
+        buttonType: 'default',
+        colorVariant: 'pink',
+        theme: 'light',
+        className:
+          'bg-[var(--pink-400)] text-white hover:bg-[var(--pink-500)] active:bg-[var(--pink-600)]',
+      },
 
       // Alt button variants
       {
@@ -120,6 +128,13 @@ const buttonVariants = cva(
         className:
           'bg-[var(--red-100)] text-[var(--red-500)] hover:bg-[var(--red-400)] hover:text-white active:bg-[var(--red-500)]',
       },
+      {
+        buttonType: 'alt',
+        colorVariant: 'pink',
+        theme: 'light',
+        className:
+          'bg-[var(--pink-100)] text-[var(--pink-500)] hover:bg-[var(--pink-400)] hover:text-white active:bg-[var(--pink-500)]',
+      },
 
       // Outline button variants
       {
@@ -128,6 +143,13 @@ const buttonVariants = cva(
         theme: 'light',
         className:
           'bg-transparent text-[var(--grey-overlay-800)] border border-[var(--grey-overlay-400)] hover:bg-[var(--grey-overlay-400)] hover:text-[var(--grey-overlay-1000)] hover:border-transparent active:bg-[var(--grey-overlay-500)]',
+      },
+      {
+        buttonType: 'outline',
+        colorVariant: 'pink',
+        theme: 'light',
+        className:
+          'bg-transparent text-[var(--pink-500)] border border-[var(--pink-400)] hover:bg-[var(--pink-100)] hover:text-[var(--pink-600)] hover:border-[var(--pink-500)] active:bg-[var(--pink-200)]',
       },
 
       // Text action button variants
@@ -165,6 +187,13 @@ const buttonVariants = cva(
         theme: 'light',
         className:
           'text-[var(--red-400)] hover:text-[var(--red-500)] active:text-[var(--red-600)]',
+      },
+      {
+        buttonType: 'text-action',
+        colorVariant: 'pink',
+        theme: 'light',
+        className:
+          'text-[var(--pink-400)] hover:text-[var(--pink-500)] active:text-[var(--pink-600)]',
       },
       {
         buttonType: 'text-action',
