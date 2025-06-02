@@ -2,16 +2,60 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Typography } from '@/components/ui/Typography/Typography';
 import { Button } from '@/components/ui/Button/Button';
 import { Card } from '@/components/ui/Card/Card';
 
 export default function ExampleQuotePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTab, setSelectedTab] = useState('Quotes');
   const [versionActionsOpen, setVersionActionsOpen] = useState(false);
   const versionActionsRef = useRef<HTMLDivElement>(null);
+  
+  const [workflowStatus, setWorkflowStatus] = useState<string>('none');
+
+  // State for ME preliminary notes
+  const [preliminaryMeNotes, setPreliminaryMeNotes] = useState<Array<{id: string, text: string, context: string}>>([]);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [currentNoteText, setCurrentNoteText] = useState('');
+  const [currentNoteContext, setCurrentNoteContext] = useState(''); // To store context for the note
+  const quoteIdForNotes = '3DZF983L7'; // Example quote ID, make dynamic if possible
+  
+  useEffect(() => {
+    // Load preliminary notes from localStorage on mount
+    const savedNotesString = localStorage.getItem(`preliminaryMeNotes_${quoteIdForNotes}`);
+    if (savedNotesString) {
+      try {
+        setPreliminaryMeNotes(JSON.parse(savedNotesString));
+      } catch (error) {
+        console.error("Failed to parse preliminary ME notes from localStorage:", error);
+        setPreliminaryMeNotes([]); // Reset to empty if parsing fails
+      }
+    }
+
+    // Check URL params first (could be coming back from technical review page)
+    const statusFromUrl = searchParams?.get('status');
+    if (statusFromUrl) {
+      localStorage.setItem('quoteWorkflowStatus', statusFromUrl);
+      setWorkflowStatus(statusFromUrl);
+      // Clear the status from URL to prevent re-triggering on refresh
+      // Ensure router is available and history.replaceState is a valid alternative if router.replace is problematic
+      if (router && typeof router.replace === 'function') {
+        router.replace('/example-quote', undefined); 
+      } else {
+        // Fallback or log if router.replace is not available as expected
+        window.history.replaceState({}, '', '/example-quote');
+      }
+    } else {
+      // Otherwise check local storage for workflow status
+      const localStatus = localStorage.getItem('quoteWorkflowStatus');
+      if (localStatus) {
+        setWorkflowStatus(localStatus);
+      }
+    }
+  }, [quoteIdForNotes, searchParams, router]);
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -36,6 +80,12 @@ export default function ExampleQuotePage() {
     { id: 'invoices', label: 'Invoices' },
     { id: 'complaints', label: 'Complaints' },
   ];
+
+  // Function to open the modal with a specific context
+  const handleOpenNoteModal = (context: string) => {
+    setCurrentNoteContext(context);
+    setIsNoteModalOpen(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8fafc]">
@@ -330,7 +380,15 @@ export default function ExampleQuotePage() {
                           <span>Set up production</span>
                           <span className="bg-[var(--green-400)] text-white text-xs font-medium px-1.5 py-0.5 rounded">New</span>
                         </button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-300 cursor-not-allowed">
+                        <button
+                          onClick={() => {
+                            router.push('/orders/technical-review');
+                            setVersionActionsOpen(false);
+                            // Set status in localStorage to persist after redirect
+                            localStorage.setItem('quoteWorkflowStatus', 'technical-review-requested');
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
                           Request technical review
                         </button>
                         <button className="w-full text-left px-4 py-2 text-sm text-gray-300 cursor-not-allowed">
@@ -357,57 +415,197 @@ export default function ExampleQuotePage() {
               </div>
             </div>
             
-            {/* Technical review section */}
-            <Card
-              className="mb-6"
-              title={
-                <Typography variant="subtitle1" color="default" className="font-semibold">
-                  Technical review has been requested
-                </Typography>
-              }
-              description={
-                <div className="space-y-2 mt-3">
-                  <div>
-                    <Typography variant="body2" color="default" className="font-semibold">
-                      Priority:
-                    </Typography>
-                    <Typography variant="body2" color="default">
-                      medium
-                    </Typography>
+            {/* Workflow Status Indicator */}
+            {workflowStatus !== 'none' && (
+              <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden bg-white">
+                <div className="bg-gray-50 p-4 border-b border-gray-200">
+                  <Typography variant="subtitle1" color="default" className="font-semibold">
+                    Order Workflow Status
+                  </Typography>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between max-w-3xl mx-auto">
+                    {/* Step 1: Technical Review */}
+                    {workflowStatus === 'technical-review-requested' ? (
+                      <Link href="/orders/technical-review/example-review-id" className="flex flex-col items-center cursor-pointer">
+                        <div className={'w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-blue-600 text-white'}>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <Typography variant="body2" color="default" className={'font-bold text-blue-600'}>
+                          Technical Review
+                        </Typography>
+                        <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          In Progress
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                          workflowStatus === 'technical-review-completed' || 
+                          workflowStatus === 'technical-review-completed-rda' || 
+                          workflowStatus === 'technical-review-completed-rfq' || 
+                          workflowStatus === 'rfq-sent' || 
+                          workflowStatus === 'production'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-500'
+                        }`}>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <Typography variant="body2" color="default" className={'text-gray-500'}>
+                          Technical Review
+                        </Typography>
+                        {(workflowStatus === 'technical-review-completed' || workflowStatus === 'technical-review-completed-rda' || workflowStatus === 'technical-review-completed-rfq' || workflowStatus === 'rfq-sent' || workflowStatus === 'production') && (
+                          <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Completed
+                          </span>
+                        )}
+                        {workflowStatus !== 'technical-review-requested' && workflowStatus !== 'technical-review-completed' && workflowStatus !== 'technical-review-completed-rda' && workflowStatus !== 'technical-review-completed-rfq' && workflowStatus !== 'rfq-sent' && workflowStatus !== 'production' && (
+                           <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                               Not Started
+                           </span>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Connector */}
+                    <div className={`flex-1 h-0.5 mx-2 ${
+                      workflowStatus === 'technical-review-completed' || 
+                      workflowStatus === 'technical-review-completed-rda' || 
+                      workflowStatus === 'technical-review-completed-rfq' || 
+                      workflowStatus === 'rfq-sent' || 
+                      workflowStatus === 'production'
+                        ? 'bg-blue-600' 
+                        : 'bg-gray-200'
+                    }`}></div>
+                    
+                    {/* Step 2: Sourcing/RFQ */}
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                        workflowStatus === 'rfq-sent' || workflowStatus === 'production'
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                        </svg>
+                      </div>
+                      <Typography variant="body2" color="default" className={workflowStatus === 'rfq-sent' ? 'font-bold text-blue-600' : 'text-gray-500'}>
+                        Supplier RFQs
+                      </Typography>
+                      {workflowStatus === 'rfq-sent' && (
+                        <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          In Progress
+                        </span>
+                      )}
+                      {workflowStatus === 'production' && (
+                        <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Completed
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Connector */}
+                    <div className={`flex-1 h-0.5 mx-2 ${
+                      workflowStatus === 'production' ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}></div>
+                    
+                    {/* Step 3: Production */}
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                        workflowStatus === 'production' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <Typography variant="body2" color="default" className={workflowStatus === 'production' ? 'font-bold text-blue-600' : 'text-gray-500'}>
+                        Production
+                      </Typography>
+                      {workflowStatus === 'production' && (
+                        <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          In Progress
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
-                  <div>
-                    <Typography variant="body2" color="default" className="font-semibold">
-                      Reasons:
-                    </Typography>
-                    <Typography variant="body2" color="default">
-                      Documentation Request, High Quantity, Complex Geometry
-                    </Typography>
-                  </div>
-                  
-                  <div>
-                    <Typography variant="body2" color="default" className="font-semibold">
-                      Description:
-                    </Typography>
-                    <Typography variant="body2" color="default">
-                      Production volumes for Project Stealth
-                    </Typography>
-                  </div>
-                  
-                  <div>
-                    <Typography variant="body2" color="default">
-                      --For Review--
-                    </Typography>
-                    <Typography variant="body2" color="default">
-                      [] Description/Use of Parts:
-                    </Typography>
-                    <Typography variant="body2" color="default">
-                      [] Custom request (Provide requirement details):
-                    </Typography>
+                  {/* Current status details */}
+                  <div className="mt-6 bg-gray-50 p-3 rounded-md text-sm">
+                    {workflowStatus === 'technical-review-requested' && (
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 pt-0.5">
+                          <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <Typography variant="body2" color="default">
+                            <span className="font-medium">Technical review requested</span> - Waiting for assessment. This typically takes 1-2 business days.
+                          </Typography>
+                        </div>
+                      </div>
+                    )}
+                    {workflowStatus === 'technical-review-completed' && (
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 pt-0.5">
+                          <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <Typography variant="body2" color="default">
+                            <span className="font-medium">Technical review completed</span> - Ready to send RFQ to suppliers. 
+                            <Button
+                              buttonType="text-action"
+                              colorVariant="blue"
+                              size="s"
+                              onClick={() => router.push('/orders/send-rfq')}
+                              className="ml-2"
+                            >
+                              Send RFQ
+                            </Button>
+                          </Typography>
+                        </div>
+                      </div>
+                    )}
+                    {workflowStatus === 'rfq-sent' && (
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 pt-0.5">
+                          <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <Typography variant="body2" color="default">
+                            <span className="font-medium">RFQ sent to suppliers</span> - Waiting for responses. You'll be notified when bids are received.
+                          </Typography>
+                        </div>
+                      </div>
+                    )}
+                    {workflowStatus === 'production' && (
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 pt-0.5">
+                          <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <Typography variant="body2" color="default">
+                            <span className="font-medium">Production in progress</span> - Supplier has been selected and production has started.
+                          </Typography>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              }
-            />
+              </div>
+            )}
             
             {/* Notes and access settings */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -589,10 +787,34 @@ export default function ExampleQuotePage() {
             
             {/* Parts and pricing */}
             <div className="mb-6">
-              <Typography variant="h3" color="default" className="font-semibold mb-4">
-                Parts and pricing
-                <span className="text-sm font-normal text-gray-600 ml-2">4 parts / 10000 pcs.</span>
-              </Typography>
+              <div className="flex justify-between items-center mb-4">
+                <Typography variant="h3" color="default" className="font-semibold">
+                  Parts and pricing
+                  <span className="text-sm font-normal text-gray-600 ml-2">4 parts / 10000 pcs.</span>
+                </Typography>
+                <Button 
+                  buttonType="outline"
+                  colorVariant="blue"
+                  size="s"
+                  onClick={() => handleOpenNoteModal('General Parts & Pricing Note')}
+                >
+                  Add General Note
+                </Button>
+              </div>
+
+              {/* Display Preliminary ME Notes */}
+              {preliminaryMeNotes.length > 0 && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <Typography variant="subtitle2" className="font-semibold text-amber-800 mb-2">Preliminary ME Notes:</Typography>
+                  <ul className="list-disc list-inside space-y-1">
+                    {preliminaryMeNotes.map(note => (
+                      <li key={note.id} className="text-sm text-amber-700">
+                        <span className="font-semibold">{note.context}:</span> {note.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Parts list headers */}
@@ -615,7 +837,7 @@ export default function ExampleQuotePage() {
                 <div className="border-b border-gray-200 p-4">
                   <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <div className="flex items-center">
+                      <div className="flex items-start">
                         <div className="w-16 h-16 bg-gray-100 p-2 mr-4 flex items-center justify-center">
                           <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -634,6 +856,7 @@ export default function ExampleQuotePage() {
                           <Typography variant="body2" color="default">
                             As machined + Anodized type III (hardcoat)
                           </Typography>
+                          <Button size="xs" buttonType="text-action" colorVariant="blue" onClick={() => handleOpenNoteModal('Part 78-8137 - Specs')} className="mt-1">Add Note</Button>
                         </div>
                       </div>
                     </div>
@@ -647,6 +870,7 @@ export default function ExampleQuotePage() {
                       <Typography variant="body2" color="default" className="ml-4 text-xs">
                         • Tolerances apply after anodizing, not thread oversize to compensate
                       </Typography>
+                      <Button size="xs" buttonType="text-action" colorVariant="blue" onClick={() => handleOpenNoteModal('Part 78-8137 - Requirements')} className="mt-1">Add Note</Button>
                     </div>
                     <div className="flex justify-center items-center">
                       <Typography variant="body1" color="default" className="font-semibold">
@@ -717,6 +941,7 @@ export default function ExampleQuotePage() {
                       <Typography variant="body2" color="default">
                         Shipping - Standard / 1 - 2 business days
                       </Typography>
+                      <Button size="xs" buttonType="text-action" colorVariant="blue" onClick={() => handleOpenNoteModal('Shipping Note')} className="mt-1">Add Note</Button>
                     </div>
                     <div className="text-right">
                       <Typography variant="body2" color="default">
@@ -762,6 +987,7 @@ export default function ExampleQuotePage() {
                       <Typography variant="body1" color="default" className="font-semibold">
                         Total
                       </Typography>
+                      <Button size="xs" buttonType="text-action" colorVariant="blue" onClick={() => handleOpenNoteModal('Total/Pricing Note')} className="mt-1">Add Note</Button>
                     </div>
                     <div className="text-right">
                       <Typography variant="h3" color="default" className="font-bold">
@@ -775,6 +1001,116 @@ export default function ExampleQuotePage() {
           </div>
         </div>
       </div>
+
+      {/* Demo Admin Panel - For testing workflow states (hidden in production) */}
+      <div className="mt-8 p-4 border border-gray-300 border-dashed rounded-lg bg-gray-50">
+        <Typography variant="subtitle1" color="default" className="font-medium mb-3">
+          Demo Controls (For Testing)
+        </Typography>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            buttonType="outline"
+            colorVariant="grey"
+            size="s"
+            onClick={() => {
+              localStorage.setItem('quoteWorkflowStatus', 'none');
+              setWorkflowStatus('none');
+            }}
+          >
+            Reset Status
+          </Button>
+          <Button
+            buttonType="outline"
+            colorVariant="blue"
+            size="s"
+            onClick={() => {
+              localStorage.setItem('quoteWorkflowStatus', 'technical-review-requested');
+              setWorkflowStatus('technical-review-requested');
+            }}
+          >
+            Set: Tech Review Requested
+          </Button>
+          <Button
+            buttonType="outline"
+            colorVariant="blue"
+            size="s"
+            onClick={() => {
+              localStorage.setItem('quoteWorkflowStatus', 'technical-review-completed');
+              setWorkflowStatus('technical-review-completed');
+            }}
+          >
+            Set: Tech Review Completed
+          </Button>
+          <Button
+            buttonType="outline"
+            colorVariant="blue"
+            size="s"
+            onClick={() => {
+              localStorage.setItem('quoteWorkflowStatus', 'rfq-sent');
+              setWorkflowStatus('rfq-sent');
+            }}
+          >
+            Set: RFQ Sent
+          </Button>
+          <Button
+            buttonType="outline"
+            colorVariant="blue"
+            size="s"
+            onClick={() => {
+              localStorage.setItem('quoteWorkflowStatus', 'production');
+              setWorkflowStatus('production');
+            }}
+          >
+            Set: Production
+          </Button>
+        </div>
+      </div>
+
+      {/* ME Note Modal */}
+      {isNoteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <Typography variant="h3" className="text-xl font-semibold mb-4">Add Note for ME Review</Typography>
+            <textarea
+              className="w-full border border-gray-300 rounded-md p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
+              rows={4}
+              placeholder="Enter your note..."
+              value={currentNoteText}
+              onChange={(e) => setCurrentNoteText(e.target.value)}
+            />
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                buttonType="outline"
+                colorVariant="grey"
+                onClick={() => {
+                  setIsNoteModalOpen(false);
+                  setCurrentNoteText(''); // Clear text on cancel
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                buttonType="default"
+                colorVariant="blue"
+                onClick={() => {
+                  if (currentNoteText.trim()) {
+                    const newNote = { id: Date.now().toString(), text: currentNoteText.trim(), context: currentNoteContext };
+                    const updatedNotes = [...preliminaryMeNotes, newNote];
+                    setPreliminaryMeNotes(updatedNotes);
+                    localStorage.setItem(`preliminaryMeNotes_${quoteIdForNotes}`, JSON.stringify(updatedNotes));
+                    setCurrentNoteText('');
+                    setCurrentNoteContext(''); // Reset context
+                    setIsNoteModalOpen(false);
+                  }
+                }}
+                disabled={!currentNoteText.trim()}
+              >
+                Save Note
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
