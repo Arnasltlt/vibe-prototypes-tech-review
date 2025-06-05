@@ -7,12 +7,12 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/orders');
+    router.push('/wireframe-showcase');
   }, [router]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-gray-800 text-xl">Loading...</div>
+      <div className="text-gray-800 text-xl">Redirecting to Wireframe Showcase...</div>
     </div>
   );
 }
