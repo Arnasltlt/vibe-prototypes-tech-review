@@ -28,20 +28,29 @@ const mockLineItems: LineItem[] = [
 
 // Mock data for review details - replace with actual data
 const mockReviewDetails = {
+  // --For Review--
+  htsCodes: '8479.90.9496',
+  customRequest: 'Material certification required. Specific surface finish Ra 0.8 on mating surfaces.',
+  quoteVersionNumbers: 'V30, V31',
+  previousReviewChanges: 'Minor adjustment to tolerance callout on drawing for V31.',
+  ignorableDrawingNotes: 'None, all notes are critical.',
+  sourcingRequirements: 'EU region preferred. Avoid MP-123.',
+  documentationRequired: 'CofC, Material Certs.',
+  otherInfo: 'Part will be assembled with a bearing, press-fit.',
+
+  // COMMERCIAL
+  reorderInfo: 'Reorder of PO #DEAL-12345',
+  futureVolume: '1000 units/year',
+  targetLeadTime: 'ASAP',
+  targetPrice: '$45,000',
+  industryApplication: 'Critical housing component for an aerospace assembly. Requires tight tolerances and specific alloy.',
+  equivalentMaterialsAllowed: 'Yes, pre-approved list attached.',
+
+  // Original data preserved for other parts of the UI
   requestedBy: 'John Doe (Deal Owner)',
   quoteId: '3DZF983L7-V31',
   reasons: ['Complex Geometry', 'Non-checkout Material'],
   priority: 'High',
-  htsCodes: '8479.90.9496',
-  descriptionOfParts: 'Critical housing component for an aerospace assembly. Requires tight tolerances and specific alloy.',
-  customRequestDetails: 'Material certification required. Specific surface finish Ra 0.8 on mating surfaces.',
-  quoteVersionNumbers: 'V30, V31',
-  previousReviewChanges: 'Minor adjustment to tolerance callout on drawing for V31.',
-  reorderPreviousDealLink: 'DEAL-12345',
-  reorderType: 'Production',
-  ignorableDrawingNotes: 'None, all notes are critical.',
-  purchaseIntent: 'High',
-  // Add other fields as necessary
 };
 
 // Mock AI Analysis Data
@@ -180,6 +189,12 @@ export default function MechanicalEngineerReviewPage() {
     console.log(`ME Action for review ${reviewId}: ${action}`);
     let newStatus = 'technical-review-completed'; // Default, can be more specific
     
+    const technicalReviewSummary = {
+      aiAnalysis: mockAiAnalysis,
+      supplyChainAssessment: mockSupplyChainAssessment,
+      preliminaryNotes: retrievedPreliminaryNotes,
+    };
+
     if (action === 'rda') {
       newStatus = 'technical-review-completed-rda'; // Example specific status
       localStorage.setItem('quoteWorkflowStatus', newStatus);
@@ -188,6 +203,7 @@ export default function MechanicalEngineerReviewPage() {
     } else if (action === 'rfq') {
       newStatus = 'technical-review-completed-rfq'; // Example specific status
       localStorage.setItem('quoteWorkflowStatus', newStatus);
+      localStorage.setItem('technicalReviewSummary', JSON.stringify(technicalReviewSummary));
       // Potentially call an API to update backend
       router.push(`/example-quote?status=${newStatus}`);
     } else if (action === 'pricing') {
@@ -294,19 +310,34 @@ export default function MechanicalEngineerReviewPage() {
               {/* LEFT COLUMN (scrollable content) */}
               <div className="flex-1 space-y-6">
                 {/* Review Details */}
-                <Accordion title="Review Request Details" defaultOpen={false}>
-                  <div className="space-y-3">
-                    <div><Typography variant="subtitle2">Requested By:</Typography> <Typography>{mockReviewDetails.requestedBy}</Typography></div>
-                    <div><Typography variant="subtitle2">Reasons for Review:</Typography> <Typography>{mockReviewDetails.reasons.join(', ')}</Typography></div>
-                    <div><Typography variant="subtitle2">Priority:</Typography> <Typography className={`font-semibold ${mockReviewDetails.priority === 'High' ? 'text-red-600' : mockReviewDetails.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'}`}>{mockReviewDetails.priority}</Typography></div>
-                    <div><Typography variant="subtitle2">HTS Codes:</Typography> <Typography>{mockReviewDetails.htsCodes}</Typography></div>
-                    <div><Typography variant="subtitle2">Description/Use of Parts:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.descriptionOfParts}</Typography></div>
-                    <div><Typography variant="subtitle2">Custom Request Details:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.customRequestDetails}</Typography></div>
-                    <div><Typography variant="subtitle2">Quote Version(s):</Typography> <Typography>{mockReviewDetails.quoteVersionNumbers}</Typography></div>
-                    <div><Typography variant="subtitle2">Changes from Previous Review:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.previousReviewChanges}</Typography></div>
-                    <div><Typography variant="subtitle2">Reorder (Previous Deal & Type):</Typography> <Typography>{mockReviewDetails.reorderPreviousDealLink} ({mockReviewDetails.reorderType})</Typography></div>
-                    <div><Typography variant="subtitle2">Ignorable Drawing Notes:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.ignorableDrawingNotes}</Typography></div>
-                    <div><Typography variant="subtitle2">Purchase Intent:</Typography> <Typography>{mockReviewDetails.purchaseIntent}</Typography></div>
+                <Accordion title="Review Request Details" defaultOpen={true}>
+                  <div className="space-y-6 p-4">
+                    {/* --For Review-- Section */}
+                    <div>
+                      <Typography variant="h4" className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">--For Review--</Typography>
+                      <div className="space-y-3">
+                        <div><Typography variant="subtitle2">HTS Codes:</Typography> <Typography>{mockReviewDetails.htsCodes}</Typography></div>
+                        <div><Typography variant="subtitle2">Custom request:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.customRequest}</Typography></div>
+                        <div><Typography variant="subtitle2">Quote version number(s):</Typography> <Typography>{mockReviewDetails.quoteVersionNumbers}</Typography></div>
+                        <div><Typography variant="subtitle2">If previously reviewed, what changed?</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.previousReviewChanges}</Typography></div>
+                        <div><Typography variant="subtitle2">From the drawing notes or call-outs, which ones can be ignored?</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.ignorableDrawingNotes}</Typography></div>
+                        <div><Typography variant="subtitle2">Sourcing requirements? (Region? MP?)</Typography> <Typography>{mockReviewDetails.sourcingRequirements}</Typography></div>
+                        <div><Typography variant="subtitle2">Documentation required?</Typography> <Typography>{mockReviewDetails.documentationRequired}</Typography></div>
+                        <div><Typography variant="subtitle2">Other info:</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.otherInfo}</Typography></div>
+                      </div>
+                    </div>
+
+                    {/* COMMERCIAL Section */}
+                    <div>
+                      <Typography variant="h4" className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">COMMERCIAL</Typography>
+                      <div className="space-y-3">
+                        <div><Typography variant="subtitle2">Reorder (Previous PO #)? Future volume?</Typography> <Typography>{mockReviewDetails.reorderInfo}, {mockReviewDetails.futureVolume}</Typography></div>
+                        <div><Typography variant="subtitle2">Target LT:</Typography> <Typography>{mockReviewDetails.targetLeadTime}</Typography></div>
+                        <div><Typography variant="subtitle2">Target $:</Typography> <Typography>{mockReviewDetails.targetPrice}</Typography></div>
+                        <div><Typography variant="subtitle2">Industry / Part application?</Typography> <Typography className="whitespace-pre-wrap">{mockReviewDetails.industryApplication}</Typography></div>
+                        <div><Typography variant="subtitle2">Customer open to equivalent materials?</Typography> <Typography>{mockReviewDetails.equivalentMaterialsAllowed}</Typography></div>
+                      </div>
+                    </div>
                   </div>
                 </Accordion>
 
@@ -370,6 +401,19 @@ export default function MechanicalEngineerReviewPage() {
                       </div>
                     )}
                   </div>
+                </Accordion>
+
+                {/* QUESTION / CONFIRMATION REQUIRED Section */}
+                <Accordion title="QUESTION (from CS) / CONFIRMATION REQUIRED (by MP)" defaultOpen={true}>
+                    <div className="p-4">
+                        <textarea
+                            className="w-full border border-gray-300 rounded-md p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={5}
+                            placeholder="Log questions for customer service or clarifications needed from the manufacturing partner here..."
+                            value={meNotes}
+                            onChange={(e) => setMeNotes(e.target.value)}
+                        />
+                    </div>
                 </Accordion>
               </div>
 

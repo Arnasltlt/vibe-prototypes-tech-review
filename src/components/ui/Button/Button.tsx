@@ -98,6 +98,13 @@ const buttonVariants = cva(
         className:
           'bg-[var(--pink-400)] text-white hover:bg-[var(--pink-500)] active:bg-[var(--pink-600)]',
       },
+      {
+        buttonType: 'default',
+        colorVariant: 'blue',
+        theme: 'light',
+        className:
+          'bg-[var(--network-blue-400)] text-white hover:bg-[var(--network-blue-500)] active:bg-[var(--network-blue-600)]',
+      },
 
       // Alt button variants
       {

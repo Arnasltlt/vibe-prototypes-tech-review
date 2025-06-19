@@ -1,25 +1,32 @@
+'use client';
+
 import React, { useState, ReactNode } from 'react';
 
 interface AccordionProps {
-  title: string;
-  defaultOpen?: boolean;
+  title: ReactNode;
   children: ReactNode;
+  defaultOpen?: boolean;
 }
 
-export const Accordion: React.FC<AccordionProps> = ({ title, defaultOpen = false, children }) => {
-  const [open, setOpen] = useState(defaultOpen);
+export const Accordion: React.FC<AccordionProps> = ({ title, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
       <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 hover:bg-gray-100"
+        className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 focus:outline-none"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="text-sm font-semibold text-gray-800">{title}</span>
-        <span className="text-gray-500 text-xl leading-none">{open ? '−' : '+'}</span>
+        <div className="font-semibold text-gray-900">{title}</div>
+        <span className="text-blue-600 text-xl transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          ▼
+        </span>
       </button>
-      {open && <div className="p-4 bg-white">{children}</div>}
+      {isOpen && (
+        <div className="p-4 border-t border-gray-200 bg-white">
+          {children}
+        </div>
+      )}
     </div>
   );
 }; 

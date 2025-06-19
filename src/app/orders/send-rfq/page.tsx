@@ -1,19 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography } from '@/components/ui/Typography/Typography';
 import { Button } from '@/components/ui/Button/Button';
 import { Card } from '@/components/ui/Card/Card';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { SupplierSelection } from '@/app/components/suppliers/SupplierSelection';
+import { Accordion } from '@/components/ui/Accordion/Accordion';
+
+// Mock line items - replace with actual data
+const mockLineItems = [
+  {
+    id: 1,
+    name: '4012633_AB.stp',
+    thumbnailUrl: '/metal-part.png',
+    subtitle: '1 attachment, CNC machining, AL 7075-T6',
+    price: '€52435.00',
+    manualPriceLabel: 'Manually priced',
+  },
+  {
+    id: 2,
+    name: 'M10000145.stp',
+    thumbnailUrl: '/metal-part.png',
+    subtitle: 'CNC machining, AL 7075-T6',
+    price: '—',
+  },
+];
 
 export default function SendRFQPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [expandedSection, setExpandedSection] = useState('general');
   const [expandAllDetails, setExpandAllDetails] = useState(false);
   const [expandedItems, setExpandedItems] = useState<number[]>([]); // No items expanded by default
+  const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [rfqSent, setRfqSent] = useState(false);
+  const [requirementsComplete, setRequirementsComplete] = useState(false);
+  const [requirementsData, setRequirementsData] = useState<any>(null);
+  const [technicalReviewSummary, setTechnicalReviewSummary] = useState<any>(null);
   
   const totalSteps = 2;
   const steps = [
@@ -67,6 +94,29 @@ export default function SendRFQPage() {
     // Navigate to orders page
     router.push('/orders');
   };
+
+  useEffect(() => {
+    // Check if requirements are complete
+    const hasRequirements = searchParams?.get('requirements') === 'complete';
+    if (hasRequirements) {
+      setRequirementsComplete(true);
+      // Load requirements data
+      const savedRequirements = localStorage.getItem('rfqRequirements');
+      if (savedRequirements) {
+        setRequirementsData(JSON.parse(savedRequirements));
+      }
+    }
+
+    // Load technical review summary
+    const summaryData = localStorage.getItem('technicalReviewSummary');
+    if (summaryData) {
+      try {
+        setTechnicalReviewSummary(JSON.parse(summaryData));
+      } catch (e) {
+        console.error("Failed to parse technical review summary", e);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -148,6 +198,53 @@ export default function SendRFQPage() {
               <Typography variant="subtitle1" className="text-xl font-semibold text-gray-900 mb-4">
                 Quote overview
               </Typography>
+
+              {technicalReviewSummary && (
+                <div className="mb-6">
+                  <Accordion title="Technical Review Summary" defaultOpen={true}>
+                    <div className="space-y-4 p-4">
+                      {/* AI Analysis */}
+                      <div>
+                        <Typography variant="subtitle2" className="font-semibold mb-2">{technicalReviewSummary.aiAnalysis.title}</Typography>
+                        <div className="space-y-3">
+                          {technicalReviewSummary.aiAnalysis.findings.map((finding: any) => (
+                            <div key={finding.id} className={`p-2 rounded-md border-l-4 bg-gray-50 ${finding.severity === 'High' ? 'border-red-500' : finding.severity === 'Medium' ? 'border-yellow-500' : 'border-blue-500'}`}>
+                              <Typography variant="caption" className={`font-semibold flex items-center ${finding.severity === 'High' ? 'text-red-700' : finding.severity === 'Medium' ? 'text-yellow-700' : 'text-blue-700'}`}>
+                                <span className="mr-2 text-lg">{finding.icon}</span> {finding.type}
+                              </Typography>
+                              <Typography variant="caption" className="text-gray-800 mt-1 pl-8">{finding.details}</Typography>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Supply Chain Assessment */}
+                      <div>
+                        <Typography variant="subtitle2" className="font-semibold mb-2">{technicalReviewSummary.supplyChainAssessment.title}</Typography>
+                         <div className="text-sm text-gray-700">
+                           <p><strong>Overall Fit:</strong> {technicalReviewSummary.supplyChainAssessment.overallFit.text}</p>
+                           <p><strong>Capacity:</strong> {technicalReviewSummary.supplyChainAssessment.capacity.status}</p>
+                         </div>
+                      </div>
+
+                      {/* Preliminary Notes */}
+                      {technicalReviewSummary.preliminaryNotes.length > 0 && (
+                        <div>
+                          <Typography variant="subtitle2" className="font-semibold mb-2">Preliminary Notes</Typography>
+                          <div className="space-y-2">
+                            {technicalReviewSummary.preliminaryNotes.map((note: any) => (
+                              <div key={note.id} className="text-sm p-2 border border-amber-200 rounded-md bg-amber-50">
+                                <Typography variant="caption" className="font-semibold text-amber-600">{note.context}</Typography>
+                                <Typography className="text-gray-700 whitespace-pre-wrap mt-0.5">{note.text}</Typography>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Accordion>
+                </div>
+              )}
               
               <div className="flex items-center mb-6">
                 <input 
@@ -549,36 +646,132 @@ export default function SendRFQPage() {
                 <SupplierSelection />
               )}
 
+              {/* Requirements Status Alert */}
+              {!requirementsComplete && (
+                <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <Typography variant="body2" className="text-amber-800">
+                        <strong>Requirements not complete.</strong> Complete manufacturing requirements to prevent supplier questions and delays.
+                      </Typography>
+                      <Button
+                        buttonType="text-action"
+                        colorVariant="blue"
+                        size="s"
+                        className="mt-2"
+                        onClick={() => router.push('/orders/send-rfq/prepare')}
+                      >
+                        Complete Requirements →
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Requirements Complete Status */}
+              {requirementsComplete && (
+                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <Typography variant="body2" className="text-green-800">
+                        <strong>All requirements complete!</strong> Your RFQ includes comprehensive manufacturing specifications.
+                      </Typography>
+                      <Button
+                        buttonType="text-action"
+                        colorVariant="blue"
+                        size="s"
+                        className="mt-2"
+                        onClick={() => router.push('/orders/send-rfq/prepare')}
+                      >
+                        Review Requirements
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Line Items Section */}
+              <div className="p-6 bg-white border border-gray-200 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <Typography variant="h3" className="text-lg font-semibold">
+                    Line Items
+                  </Typography>
+                  {!requirementsComplete && (
+                    <Button
+                      buttonType="outline"
+                      colorVariant="blue"
+                      size="s"
+                      onClick={() => router.push('/orders/send-rfq/prepare')}
+                    >
+                      Prepare Requirements
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {mockLineItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={item.thumbnailUrl}
+                          alt={item.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <div>
+                          <Typography variant="subtitle2" className="font-semibold">
+                            {item.name}
+                          </Typography>
+                          <Typography variant="caption" className="text-gray-600">
+                            {item.subtitle}
+                          </Typography>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {requirementsComplete && (
+                          <span className="text-green-600 text-sm flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Requirements Complete
+                          </span>
+                        )}
+                        <Typography variant="body2" className="font-bold">
+                          {item.price}
+                        </Typography>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Form buttons */}
-              <div className="flex justify-between mt-8 pt-4 border-t">
+              <div className="flex justify-between items-center">
                 <div>
-                  <Button 
-                    buttonType="outline" 
-                    colorVariant="grey" 
-                    size="m"
-                    onClick={handleCancel}
-                    className="mr-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </Button>
                   {currentStep > 1 && (
                     <Button 
                       buttonType="outline" 
-                      colorVariant="blue" 
+                      colorVariant="grey" 
                       size="m"
                       onClick={handleBack}
-                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
                     >
                       Back
                     </Button>
                   )}
                 </div>
-                <Button 
-                  buttonType="default" 
-                  colorVariant="blue" 
+                <Button
+                  buttonType="default"
+                  colorVariant="blue"
                   size="m"
                   onClick={currentStep === totalSteps ? handleSubmitRfq : handleNext}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
                 >
                   {currentStep === totalSteps ? 'Submit RFQ' : 'Continue'}
                 </Button>

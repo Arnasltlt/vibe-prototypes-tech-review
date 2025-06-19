@@ -501,10 +501,23 @@ export default function ExampleQuotePage() {
                           In Progress
                         </span>
                       )}
-                      {workflowStatus === 'production' && (
-                        <span className="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Completed
-                        </span>
+                      {(workflowStatus === 'technical-review-completed' ||
+                        workflowStatus === 'technical-review-completed-rda' ||
+                        workflowStatus === 'technical-review-completed-rfq') && (
+                          <Button
+                            buttonType="text-action"
+                            colorVariant="blue"
+                            size="s"
+                            className="mt-2"
+                            onClick={() => {
+                              router.push('/orders/send-rfq');
+                              // Set status to indicate RFQ process has started
+                              setWorkflowStatus('rfq-sent');
+                              localStorage.setItem('quoteWorkflowStatus', 'rfq-sent');
+                            }}
+                          >
+                            Send RFQ →
+                          </Button>
                       )}
                     </div>
                     
